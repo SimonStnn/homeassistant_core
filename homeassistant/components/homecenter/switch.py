@@ -26,7 +26,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up Homecenter switch based on config_entry."""
     controller: Homecenter = hass.data[DOMAIN][entry.entry_id]
-    entity_map: dict[int, HomecenterEntity] = {}
+    entity_map: dict[int, HomecenterSwitch] = {}
     for component in controller.get_all(ComponentType.SWITCH):
         channel = HomecenterToggle(controller, component)
         entity = HomecenterSwitch(channel)
@@ -39,8 +39,9 @@ async def async_setup_entry(
 
     async_add_entities(list(entity_map.values()))
 
-    def handle_status_update(component: Component, new_state: HomecenterToggle.State):
+    def handle_status_update(component: Component, *args: Any):
         """Event handler for status updates."""
+        new_state: HomecenterToggle.State = args[0]
         try:
             # find entity in entity_map
             entity = entity_map[component.id]

@@ -1,5 +1,6 @@
 """Support for Homecenter binary sensor."""
 import logging
+from typing import Any
 
 from homecenteraio.channels import Input as HomecenterInput
 from homecenteraio.component import Component, ComponentType
@@ -29,7 +30,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up Homecenter binary sensor based on config_entry."""
     controller: Homecenter = hass.data[DOMAIN][entry.entry_id]
-    entity_map: dict[int, HomecenterEntity] = {}
+    entity_map: dict[int, HomecenterBinarySensor] = {}
     for component in controller.get_all(ComponentType.INPUT):
         channel = HomecenterInput(controller, component)
         entity = HomecenterBinarySensor(channel)
@@ -42,8 +43,9 @@ async def async_setup_entry(
 
     async_add_entities(list(entity_map.values()))
 
-    def handle_status_update(component: Component, new_state: HomecenterInput.State):
+    def handle_status_update(component: Component, *args: Any) -> None:
         """Event handler for status updates."""
+        new_state: HomecenterInput.State = args[0]
         try:
             # find entity in entity_map
             entity = entity_map[component.id]
