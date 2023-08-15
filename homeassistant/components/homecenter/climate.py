@@ -12,6 +12,9 @@ from homecenteraio.const import Event
 from homecenteraio.controller import Homecenter
 
 from homeassistant.components.climate import (
+    ATTR_CURRENT_TEMPERATURE,
+    ATTR_HVAC_MODE,
+    ATTR_PRESET_MODE,
     ATTR_TEMPERATURE,
     ClimateEntity,
     ClimateEntityFeature,
@@ -36,7 +39,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up Homecenter climate based on config_entry."""
     controller: Homecenter = hass.data[DOMAIN][entry.entry_id]
-    entity_map: dict[int, HomecenterEntity] = {}
+    entity_map: dict[int, HomecenterClimate] = {}
     for component in controller.get_all(ComponentType.THERMOSTAT):
         channel = HomecenterThermostat(controller, component)
         entity = HomecenterClimate(channel)
@@ -49,12 +52,12 @@ async def async_setup_entry(
 
     async_add_entities(list(entity_map.values()))
 
-    def handle_status_update(
-        component: Component,
-        update_type: HomecenterThermostat.UpdateType,
-        new_state: int,
-    ):
+    def handle_status_update(component: Component, *args: Any):
         """Event handler for status updates."""
+        current_temp: float = args[0]
+        set_preset: str = args[1]
+        set_temperature: float = args[2]
+        mode: HomecenterThermostat.Mode = args[3]
         try:
             # find entity in entity_map
             entity = entity_map[component.id]
@@ -68,7 +71,17 @@ async def async_setup_entry(
             if not state:
                 return _LOGGER.warning("No state found for %s", component.description)
 
-            # hass.states.async_set(entity.entity_id, "on" if new_state > 0 else "off")
+            new_attributes = state.attributes.copy()
+            new_attributes[ATTR_CURRENT_TEMPERATURE] = current_temp
+            new_attributes[ATTR_PRESET_MODE] = set_preset
+            new_attributes[ATTR_TEMPERATURE] = set_temperature
+            new_attributes[ATTR_HVAC_MODE] = HVACMode[mode.name.upper()]
+
+            hass.states.async_set(
+                entity.entity_id,
+                "off" if mode == HomecenterThermostat.Mode.OFF else "on",
+                new_attributes,
+            )
         except AttributeError as error:
             _LOGGER.warning(error)
 
@@ -142,4 +155,4 @@ class HomecenterClimate(HomecenterEntity, ClimateEntity):
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set the HVAC mode."""
-        return await super().async_set_hvac_mode(hvac_mode)
+        await self._channel.set_hvac_mode(HomecenterThermostat.Mode[hvac_mode.name])
