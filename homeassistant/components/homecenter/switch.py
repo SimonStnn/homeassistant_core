@@ -28,8 +28,7 @@ async def async_setup_entry(
     controller: Homecenter = hass.data[DOMAIN][entry.entry_id]
     entity_map: dict[int, HomecenterSwitch] = {}
     for component in controller.get_all(ComponentType.SWITCH):
-        channel = HomecenterToggle(controller, component)
-        entity = HomecenterSwitch(channel)
+        entity = HomecenterSwitch(component.channel)
 
         if component.id in entity_map:
             _LOGGER.warning("Component id (%s) already in entity map", component.id)

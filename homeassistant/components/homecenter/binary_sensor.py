@@ -32,8 +32,7 @@ async def async_setup_entry(
     controller: Homecenter = hass.data[DOMAIN][entry.entry_id]
     entity_map: dict[int, HomecenterBinarySensor] = {}
     for component in controller.get_all(ComponentType.INPUT):
-        channel = HomecenterInput(controller, component)
-        entity = HomecenterBinarySensor(channel)
+        entity = HomecenterBinarySensor(component.channel)
 
         if component.id in entity_map:
             _LOGGER.warning("Component id (%s) already in entity map", component.id)

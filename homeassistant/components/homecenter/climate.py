@@ -3,7 +3,6 @@ import logging
 from typing import Any
 
 from homecenteraio.channels import (
-    HVAC as HomecenterHVAC,
     Channel as HomecenterChannel,
     Thermostat as HomecenterThermostat,
 )
@@ -41,8 +40,7 @@ async def async_setup_entry(
     controller: Homecenter = hass.data[DOMAIN][entry.entry_id]
     entity_map: dict[int, HomecenterClimate] = {}
     for component in controller.get_all(ComponentType.THERMOSTAT):
-        channel = HomecenterThermostat(controller, component)
-        entity = HomecenterClimate(channel)
+        entity = HomecenterClimate(component.channel)
 
         if component.id in entity_map:
             _LOGGER.warning("Component id (%s) already in entity map", component.id)
@@ -120,13 +118,13 @@ class HomecenterClimate(HomecenterEntity, ClimateEntity):
 
         # Set the hvac modes
         hvac_modes: list[HVACMode] = []
-        if HomecenterHVAC.Mode.OFF in self._channel.modes:
+        if HomecenterThermostat.Mode.OFF in self._channel.modes:
             hvac_modes.append(HVACMode.OFF)
-        if HomecenterHVAC.Mode.AUTO in self._channel.modes:
+        if HomecenterThermostat.Mode.AUTO in self._channel.modes:
             hvac_modes.append(HVACMode.AUTO)
-        if HomecenterHVAC.Mode.HEAT in self._channel.modes:
+        if HomecenterThermostat.Mode.HEAT in self._channel.modes:
             hvac_modes.append(HVACMode.HEAT)
-        if HomecenterHVAC.Mode.COOL in self._channel.modes:
+        if HomecenterThermostat.Mode.COOL in self._channel.modes:
             hvac_modes.append(HVACMode.COOL)
         self._attr_hvac_modes = hvac_modes
 

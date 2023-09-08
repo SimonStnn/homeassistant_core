@@ -2,7 +2,10 @@
 import logging
 from typing import Any
 
-from homecenteraio.channels import Shade as HomecenterShade
+from homecenteraio.channels import (
+    Channel as HomecenterChannel,
+    Shade as HomecenterShade,
+)
 from homecenteraio.component import Component, ComponentType
 from homecenteraio.const import Event
 from homecenteraio.controller import Homecenter
@@ -28,8 +31,7 @@ async def async_setup_entry(
     controller: Homecenter = hass.data[DOMAIN][entry.entry_id]
     entity_map: dict[int, HomecenterCover] = {}
     for component in controller.get_all(ComponentType.SHADE):
-        channel = HomecenterShade(controller, component)
-        entity = HomecenterCover(channel)
+        entity = HomecenterCover(component.channel)
 
         if component.id in entity_map:
             _LOGGER.warning("Component id (%s) already in entity map", component.id)
@@ -84,7 +86,7 @@ class HomecenterCover(HomecenterEntity, CoverEntity):
 
     _channel: HomecenterShade
 
-    def __init__(self, channel: HomecenterShade) -> None:
+    def __init__(self, channel: HomecenterChannel) -> None:
         """Initialize the cover."""
         super().__init__(channel)
 

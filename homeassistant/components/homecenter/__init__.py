@@ -36,10 +36,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     controller = Homecenter(
         f"{entry.data[CONF_ADDRESS]}:{entry.data[CONF_PORT]}",
         entry.data[CONF_USERNAME],
+        entry.data[CONF_PASSWORD],
     )
     hass.data[DOMAIN][entry.entry_id] = controller
 
-    await controller.connect(entry.data[CONF_PASSWORD])
+    await controller.connect()
 
     await controller.request_components()
     await controller.await_components()
