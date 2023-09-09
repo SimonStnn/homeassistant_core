@@ -28,7 +28,6 @@ from .const import DOMAIN
 from .entity import HomecenterEntity
 
 _LOGGER = logging.getLogger(__name__)
-_LOGGER.setLevel(logging.DEBUG)
 
 
 async def async_setup_entry(

@@ -15,7 +15,6 @@ from homeassistant.exceptions import HomeAssistantError
 from .const import DEFAULT_PORT, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
-_LOGGER.setLevel(logging.DEBUG)
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {

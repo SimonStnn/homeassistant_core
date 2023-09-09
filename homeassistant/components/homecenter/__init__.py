@@ -18,7 +18,6 @@ from homeassistant.core import HomeAssistant
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
-_LOGGER.setLevel(logging.DEBUG)
 
 PLATFORMS: list[Platform] = [
     Platform.LIGHT,
@@ -34,9 +33,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
 
     controller = Homecenter(
-        f"{entry.data[CONF_ADDRESS]}:{entry.data[CONF_PORT]}",
         entry.data[CONF_USERNAME],
         entry.data[CONF_PASSWORD],
+        f"{entry.data[CONF_ADDRESS]}:{entry.data[CONF_PORT]}",
     )
     hass.data[DOMAIN][entry.entry_id] = controller
 
